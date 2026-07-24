@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Las Jaya Abadi — Contoh Aplikasi Bengkel Las</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#1E2124;
+    --charcoal-2:#2A2E32;
+    --steel:#565E67;
+    --steel-light:#C7CBCF;
+    --plate:#F3F1EA;
+    --plate-2:#FFFFFF;
+    --spark:#FF6A1A;
+    --spark-dark:#C24E0F;
+    --hazard:#F2B705;
+    --success:#2F9E5B;
+    --danger:#D64545;
+    --text:#1E2124;
+    --text-muted:#6A6F75;
+    --border:#E2DFD6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--plate);
+    color:var(--text);
+    display:flex;
+    min-height:100vh;
+  }
+  h1,h2,h3,.brand,.nav-item{font-family:'Oswald',sans-serif;letter-spacing:0.02em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  /* SIDEBAR */
+  .sidebar{
+    width:230px;
+    background:var(--charcoal);
+    color:#EDEBE4;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .hazard-strip{
+    height:6px;
+    background:repeating-linear-gradient(135deg,var(--hazard) 0 14px,var(--charcoal) 14px 28px);
+  }
+  .brand{
+    padding:22px 20px 18px;
+    font-size:19px;
+    font-weight:700;
+    color:#fff;
+    border-bottom:1px solid #34383D;
+  }
+  .brand span{display:block;font-family:'Inter',sans-serif;font-size:11px;font-weight:400;color:var(--steel-light);letter-spacing:0.03em;margin-top:3px;}
+  .nav{padding:14px 10px;display:flex;flex-direction:column;gap:2px;flex:1;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:6px;
+    font-size:13px;font-weight:500;color:var(--steel-light);
+    cursor:pointer;border:none;background:none;text-align:left;width:100%;
+    transition:background .15s;
+  }
+  .nav-item:hover{background:#2C3136;color:#fff;}
+  .nav-item.active{background:var(--spark);color:#fff;}
+  .nav-icon{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .sidebar-foot{padding:16px 20px;font-size:11px;color:var(--steel);border-top:1px solid #34383D;}
+
+  /* MAIN */
+  .main{flex:1;padding:28px 34px;overflow-y:auto;}
+  .view{display:none;}
+  .view.active{display:block;animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+  .topbar h1{font-size:24px;font-weight:600;}
+  .topbar p{color:var(--text-muted);font-size:13px;margin-top:4px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:10px 16px;border-radius:6px;border:none;
+    font-family:'Inter',sans-serif;font-weight:500;font-size:13px;cursor:pointer;
+  }
+  .btn-primary{background:var(--spark);color:#fff;}
+  .btn-primary:hover{background:var(--spark-dark);}
+  .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);}
+  .btn-outline:hover{border-color:var(--steel);}
+
+  /* STAT CARDS */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+  .stat-card{background:var(--plate-2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;}
+  .stat-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--spark);}
+  .stat-card.alt::before{background:var(--hazard);}
+  .stat-card.success::before{background:var(--success);}
+  .stat-card p.label{font-size:12px;color:var(--text-muted);margin-bottom:6px;}
+  .stat-card p.value{font-size:24px;font-weight:600;font-family:'Oswald',sans-serif;}
+
+  .panel{background:var(--plate-2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .panel-head h3{font-size:15px;font-weight:600;color:var(--text);}
+
+  /* ORDER LIST */
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;border-bottom:1px solid var(--border);}
+  td{padding:12px 10px;border-bottom:1px solid var(--border);}
+  tr:last-child td{border-bottom:none;}
+  .customer{font-weight:500;}
+  .job-desc{color:var(--text-muted);font-size:12px;}
+  .badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .badge-antre{background:#FDF0D5;color:#8A5C05;}
+  .badge-proses{background:#E1EEFA;color:#1F5C99;}
+  .badge-selesai{background:#E2F3E8;color:#227A47;}
+  .price{font-family:'IBM Plex Mono',monospace;font-weight:500;}
+
+  /* PROGRESS */
+  .weld-progress{display:flex;align-items:center;gap:4px;margin:4px 0;}
+  .weld-seg{height:5px;flex:1;background:var(--border);border-radius:3px;}
+  .weld-seg.done{background:var(--spark);}
+
+  /* FORM */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .field.full{grid-column:1/-1;}
+  label{font-size:12px;font-weight:500;color:var(--text-muted);}
+  input,select,textarea{
+    padding:10px 12px;border:1px solid var(--border);border-radius:6px;
+    font-family:'Inter',sans-serif;font-size:13px;background:#fff;color:var(--text);
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--spark);outline-offset:1px;border-color:var(--spark);}
+  textarea{resize:vertical;min-height:70px;}
+  .upload-box{
+    border:1.5px dashed var(--border);border-radius:8px;padding:22px;text-align:center;
+    color:var(--text-muted);font-size:12px;cursor:pointer;
+  }
+  .upload-box:hover{border-color:var(--spark);color:var(--spark-dark);}
+
+  @media(max-width:900px){
+    .sidebar{width:70px;}
+    .brand span,.nav-item span.label{display:none;}
+    .brand{padding:20px 10px;text-align:center;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="hazard-strip"></div>
+  <div class="brand">LAS JAYA ABADI<span>Bengkel las & konstruksi besi</span></div>
+  <nav class="nav">
+    <button class="nav-item active" data-view="dashboard">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span class="label">Dashboard</span>
+    </button>
+    <button class="nav-item" data-view="order">
+      <svg class="nav-icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg><span class="label">Order</span>
+    </button>
+    <button class="nav-item" data-view="tambah">
+      <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span class="label">Tambah order</span>
+    </button>
+    <button class="nav-item" data-view="pelanggan">
+      <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 8a3 3 0 1 1 4 2.8M21 20c0-2.5-2-4.2-4-4.8"/></svg><span class="label">Pelanggan</span>
+    </button>
+    <button class="nav-item" data-view="bahan">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg><span class="label">Bahan & stok</span>
+    </button>
+    <button class="nav-item" data-view="keuangan">
+      <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 15c0 1.2 1.3 2 3 2s3-.9 3-2-1.3-1.7-3-2-3-.8-3-2 1.3-2 3-2 3 .8 3 2"/></svg><span class="label">Keuangan</span>
+    </button>
+  </nav>
+  <div class="sidebar-foot">v1.0 — contoh tampilan</div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="topbar">
+      <div>
+        <h1>Halo, Pak Budi</h1>
+        <p>Ringkasan bengkel hari ini, Jumat 24 Juli 2026</p>
+      </div>
+      <button class="btn btn-primary" onclick="showView('tambah')">+ Order baru</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><p class="label">Order aktif</p><p class="value">7</p></div>
+      <div class="stat-card alt"><p class="label">Antre dikerjakan</p><p class="value">3</p></div>
+      <div class="stat-card success"><p class="label">Selesai hari ini</p><p class="value">3</p></div>
+      <div class="stat-card"><p class="label">Pendapatan hari ini</p><p class="value">Rp2,4jt</p></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Order terbaru</h3>
+        <button class="btn btn-outline" onclick="showView('order')">Lihat semua</button>
+      </div>
+      <table>
+        <thead><tr><th>Pelanggan</th><th>Pekerjaan</th><th>Status</th><th>Harga</th></tr></thead>
+        <tbody>
+          <tr><td class="customer">Pak Hendra</td><td class="job-desc">Pagar besi + cat, 3 x 1,5 m</td><td><span class="badge badge-antre">Antre</span></td><td class="price">Rp850.000</td></tr>
+          <tr><td class="customer">Bu Sari</td><td class="job-desc">Teralis jendela, las argon</td><td><span class="badge badge-proses">Proses</span></td><td class="price">Rp1.200.000</td></tr>
+          <tr><td class="customer">CV Mitra Jaya</td><td class="job-desc">Rangka atap kanopi</td><td><span class="badge badge-selesai">Selesai</span></td><td class="price">Rp3.100.000</td></tr>
+          <tr><td class="customer">Pak Anto</td><td class="job-desc">Perbaikan pintu besi rusak engsel</td><td><span class="badge badge-antre">Antre</span></td><td class="price">Rp350.000</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- DAFTAR ORDER -->
+  <section class="view" id="view-order">
+    <div class="topbar">
+      <div><h1>Daftar order</h1><p>Semua pekerjaan yang sedang dan sudah dikerjakan</p></div>
+      <button class="btn btn-primary" onclick="showView('tambah')">+ Order baru</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>#ORD-0142 — Bu Sari</h3><span class="badge badge-proses">Proses</span></div>
+      <p class="job-desc" style="margin-bottom:10px;">Teralis jendela 2 unit, las argon, finishing cat duco hitam</p>
+      <div class="weld-progress">
+        <div class="weld-seg done"></div><div class="weld-seg done"></div><div class="weld-seg done"></div><div class="weld-seg"></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);">Tahap: pengelasan rangka → menuju finishing cat</p>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead><tr><th>Kode</th><th>Pelanggan</th><th>Pekerjaan</th><th>Status</th><th>Harga</th><th>DP</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">ORD-0140</td><td class="customer">Pak Hendra</td><td class="job-desc">Pagar besi + cat</td><td><span class="badge badge-antre">Antre</span></td><td class="price">Rp850.000</td><td>Rp300.000</td></tr>
+          <tr><td class="mono">ORD-0141</td><td class="customer">Pak Anto</td><td class="job-desc">Perbaikan pintu besi</td><td><span class="badge badge-antre">Antre</span></td><td class="price">Rp350.000</td><td>-</td></tr>
+          <tr><td class="mono">ORD-0142</td><td class="customer">Bu Sari</td><td class="job-desc">Teralis jendela</td><td><span class="badge badge-proses">Proses</span></td><td class="price">Rp1.200.000</td><td>Rp500.000</td></tr>
+          <tr><td class="mono">ORD-0139</td><td class="customer">CV Mitra Jaya</td><td class="job-desc">Rangka atap kanopi</td><td><span class="badge badge-selesai">Selesai</span></td><td class="price">Rp3.100.000</td><td>Lunas</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TAMBAH ORDER -->
+  <section class="view" id="view-tambah">
+    <div class="topbar"><div><h1>Order baru</h1><p>Catat pesanan pekerjaan las dari pelanggan</p></div></div>
+
+    <div class="panel">
+      <div class="form-grid">
+        <div class="field"><label>Nama pelanggan</label><input type="text" placeholder="mis. Hendra Wijaya"></div>
+        <div class="field"><label>Nomor telepon</label><input type="text" placeholder="mis. 0812xxxxxxx"></div>
+        <div class="field"><label>Jenis jasa</label>
+          <select><option>Las listrik</option><option>Las argon / TIG</option><option>Las karbit</option><option>Cutting & finishing</option></select>
+        </div>
+        <div class="field"><label>Estimasi selesai</label><input type="date"></div>
+        <div class="field full"><label>Deskripsi pekerjaan</label><textarea placeholder="mis. Pagar besi 3 x 1,5 m, model minimalis, termasuk cat dasar"></textarea></div>
+        <div class="field"><label>Harga jasa</label><input type="text" placeholder="Rp"></div>
+        <div class="field"><label>Uang muka (DP)</label><input type="text" placeholder="Rp"></div>
+        <div class="field full">
+          <label>Foto referensi / lokasi</label>
+          <div class="upload-box">Ketuk untuk unggah foto</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="showView('order')">Simpan order</button>
+    </div>
+  </section>
+
+  <!-- PELANGGAN -->
+  <section class="view" id="view-pelanggan">
+    <div class="topbar"><div><h1>Pelanggan</h1><p>Data dan riwayat pelanggan bengkel</p></div></div>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Nama</th><th>Telepon</th><th>Total order</th><th>Terakhir order</th></tr></thead>
+        <tbody>
+          <tr><td class="customer">Pak Hendra</td><td class="mono">0812xxxx001</td><td>4</td><td>24 Jul 2026</td></tr>
+          <tr><td class="customer">Bu Sari</td><td class="mono">0813xxxx045</td><td>2</td><td>22 Jul 2026</td></tr>
+          <tr><td class="customer">CV Mitra Jaya</td><td class="mono">0821xxxx110</td><td>9</td><td>20 Jul 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BAHAN -->
+  <section class="view" id="view-bahan">
+    <div class="topbar"><div><h1>Bahan & stok</h1><p>Pantau ketersediaan material bengkel</p></div></div>
+    <div class="stats">
+      <div class="stat-card success"><p class="label">Besi hollow 4x4</p><p class="value">32 btg</p></div>
+      <div class="stat-card alt"><p class="label">Elektroda RB 2,6mm</p><p class="value">4 kotak</p></div>
+      <div class="stat-card"><p class="label">Kawat las argon</p><p class="value">18 kg</p></div>
+      <div class="stat-card alt"><p class="label">Gas argon</p><p class="value">1 tabung</p></div>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);">Kartu berwarna kuning menandakan stok mendekati batas minimum.</p>
+  </section>
+
+  <!-- KEUANGAN -->
+  <section class="view" id="view-keuangan">
+    <div class="topbar"><div><h1>Keuangan</h1><p>Rekap kas masuk dan keluar bulan ini</p></div></div>
+    <div class="stats">
+      <div class="stat-card success"><p class="label">Pemasukan bulan ini</p><p class="value">Rp48,2jt</p></div>
+      <div class="stat-card"><p class="label">Pengeluaran bahan</p><p class="value">Rp14,6jt</p></div>
+      <div class="stat-card alt"><p class="label">Piutang belum lunas</p><p class="value">Rp2,1jt</p></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const items = document.querySelectorAll('.nav-item');
+  function showView(name){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+name).classList.add('active');
+    items.forEach(i=>i.classList.toggle('active', i.dataset.view===name));
+  }
+  items.forEach(btn=>btn.addEventListener('click', ()=>showView(btn.dataset.view)));
+</script>
+
+</body>
+</html>
